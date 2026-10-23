@@ -9,7 +9,7 @@ anyhow = "1"
 clap = { version = "4", features = ["derive", "env"] }
 dirs = "7"
 google-drive3 = { version = "7", default-features = false, features = ["yup-oauth2", "aws-lc-rs"] }
-librqbit = "9"
+librqbit = { version = "9", default-features = false, features = ["rust-tls", "http-api-client"] }
 md-5 = "0.11"
 open = "5.4.5"
 reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
