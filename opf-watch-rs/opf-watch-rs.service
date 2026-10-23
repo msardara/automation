@@ -1,0 +1,11 @@
+[Unit]
+Description=OPF Italia torrent watcher (Rust)
+After=network-online.target
+
+[Service]
+ExecStart=%h/.cargo/bin/opf-watch-rs
+Restart=on-failure
+RestartSec=60
+
+[Install]
+WantedBy=default.target
