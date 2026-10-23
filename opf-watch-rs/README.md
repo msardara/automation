@@ -20,11 +20,12 @@ cargo install --path .
    OAuth consent screen and create an **OAuth client ID** of type *Desktop app*.
    Publish the consent screen to *In production*, otherwise refresh tokens expire after 7 days.
 2. Save the client file as `~/.opf-watch/client_secret.json`.
-3. Authorize. A browser is needed for the redirect to `localhost:8085`:
-   - on a machine with a browser: `opf-watch-rs auth`, then copy `~/.opf-watch/token.json`
-     to the same path on the server, or
-   - on the server over SSH: `ssh -L 8085:localhost:8085 server`, run `opf-watch-rs auth`,
-     open the printed URL in your local browser.
+3. Log in: `opf-watch-rs auth`. It opens the consent page in your default browser and waits on
+   `localhost:8085` (`--auth-port`) for the redirect, then stores the token in
+   `~/.opf-watch/token.json` and checks it with a Drive call. If no browser opens, it prints the URL.
+   - On a headless server, either run `auth` on a machine with a browser and copy `token.json`
+     to the same path on the server, or use `ssh -L 8085:localhost:8085 server`, run `auth`
+     there and open the printed URL in your local browser.
 
 ## Run
 

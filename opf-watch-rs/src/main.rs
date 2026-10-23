@@ -85,7 +85,8 @@ async fn main() -> Result<()> {
 }
 
 async fn auth(common: &Common) -> Result<()> {
-    let hub = drive::connect(&common.client_secret, &common.token_file, common.auth_port).await?;
+    let hub =
+        drive::connect(&common.client_secret, &common.token_file, common.auth_port, true).await?;
     drive::authorize(&hub).await?;
     info!("authorized, token stored in {}", common.token_file.display());
     Ok(())
@@ -98,7 +99,8 @@ async fn run(common: &Common, args: RunArgs) -> Result<()> {
             common.token_file.display()
         );
     }
-    let hub = drive::connect(&common.client_secret, &common.token_file, common.auth_port).await?;
+    let hub =
+        drive::connect(&common.client_secret, &common.token_file, common.auth_port, false).await?;
     let folder_id = drive::ensure_folder(&hub, &args.drive_folder).await?;
 
     std::fs::create_dir_all(&args.download_dir)?;

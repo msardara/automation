@@ -1,5 +1,7 @@
+use std::future::Future;
 use std::io::Read;
 use std::path::{Path, PathBuf};
+use std::pin::Pin;
 use std::time::Duration;
 
 use anyhow::{Context, Result, bail};
@@ -9,6 +11,7 @@ use google_drive3::hyper_rustls::{HttpsConnector, HttpsConnectorBuilder};
 use google_drive3::hyper_util::client::legacy::connect::HttpConnector;
 use google_drive3::hyper_util::client::legacy::Client;
 use google_drive3::hyper_util::rt::TokioExecutor;
+use google_drive3::yup_oauth2::authenticator_delegate::InstalledFlowDelegate;
 use google_drive3::yup_oauth2::{
     self, InstalledFlowAuthenticator, InstalledFlowReturnMethod, client::CustomHyperClientBuilder,
 };
@@ -32,20 +35,49 @@ fn https_connector() -> HttpsConnector<HttpConnector> {
         .build()
 }
 
-pub async fn connect(secret_path: &Path, token_path: &Path, redirect_port: u16) -> Result<Hub> {
+/// Opens the consent page in the default browser, and prints the URL in case that fails.
+struct BrowserDelegate;
+
+impl InstalledFlowDelegate for BrowserDelegate {
+    fn present_user_url<'a>(
+        &'a self,
+        url: &'a str,
+        _need_code: bool,
+    ) -> Pin<Box<dyn Future<Output = Result<String, String>> + Send + 'a>> {
+        Box::pin(async move {
+            println!("Opening the browser to authorize Google Drive access.");
+            println!("If it does not open, visit:\n\n{url}\n");
+            if let Err(e) = open::that_detached(url) {
+                warn!("could not open the browser: {e}");
+            }
+            // the redirect to the local port delivers the code, nothing to type
+            Ok(String::new())
+        })
+    }
+}
+
+pub async fn connect(
+    secret_path: &Path,
+    token_path: &Path,
+    redirect_port: u16,
+    open_browser: bool,
+) -> Result<Hub> {
     let secret = yup_oauth2::read_application_secret(secret_path)
         .await
         .with_context(|| format!("reading OAuth client file {}", secret_path.display()))?;
 
     let auth_client = Client::builder(TokioExecutor::new()).build(https_connector());
-    let auth = InstalledFlowAuthenticator::with_client(
+    let builder = InstalledFlowAuthenticator::with_client(
         secret,
         InstalledFlowReturnMethod::HTTPPortRedirect(redirect_port),
         CustomHyperClientBuilder::from(auth_client),
     )
-    .persist_tokens_to_disk(token_path)
-    .build()
-    .await?;
+    .persist_tokens_to_disk(token_path);
+    let auth = if open_browser {
+        builder.flow_delegate(Box::new(BrowserDelegate)).build().await?
+    } else {
+        builder.build().await?
+    };
 
     let client = Client::builder(TokioExecutor::new()).build(https_connector());
     Ok(DriveHub::new(client, auth))
