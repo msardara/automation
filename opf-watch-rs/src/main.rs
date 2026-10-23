@@ -70,10 +70,6 @@ fn config_dir() -> PathBuf {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // both aws-lc-rs and ring are compiled in, so pick the provider explicitly
-    rustls::crypto::aws_lc_rs::default_provider()
-        .install_default()
-        .ok();
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()

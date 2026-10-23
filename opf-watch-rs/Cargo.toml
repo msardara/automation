@@ -8,11 +8,10 @@ description = "Wait for new OPF Italia One Piece torrents, download them and upl
 anyhow = "1"
 clap = { version = "4", features = ["derive", "env"] }
 dirs = "7"
-google-drive3 = "7"
+google-drive3 = { version = "7", default-features = false, features = ["yup-oauth2", "aws-lc-rs"] }
 librqbit = "9"
 md-5 = "0.11"
 reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
-rustls = "0.23"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tokio = { version = "1", features = ["full"] }
