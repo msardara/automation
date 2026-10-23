@@ -1,0 +1,17 @@
+[project]
+name = "opf-watch"
+version = "0.1.0"
+description = "Wait for new OPF Italia One Piece torrents, download them and upload to Google Drive"
+readme = "README.md"
+authors = [
+    { name = "Mauro Sardara", email = "msardara@cisco.com" }
+]
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+opf-watch = "opf_watch:cli"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
